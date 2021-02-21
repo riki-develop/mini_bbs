@@ -1,4 +1,4 @@
-# mini_bbs_Table設計仕様書  
+# mini_bbs：Table設計仕様書  
 
 ## ・文章を投稿する事ができる  
 └メッセージ  
