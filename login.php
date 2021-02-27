@@ -2,7 +2,17 @@
 session_start();
 require('dbconnect.php');
 
+// 保存されたcookieの値を表示
+if ($_COOKIE['email'] !== '') {
+  $email = $_COOKIE['email'];
+}
+
 if (!empty($_POST)) {
+
+  // フォームに何かしら値が入力されたらcookieを上書き
+  $email = $_POST['email'];
+
+  // フォームに何かしら入力されたら
   if ($_POST['email'] !== '' && $_POST['password'] !== '') {
     $login = $db->prepare('SELECT * FROM members WHERE email=? AND password=?');
     $login->execute(array(
@@ -11,10 +21,17 @@ if (!empty($_POST)) {
     ));
     $member = $login->fetch();
 
+    // DBの値が入っていたら（接続できたら）
     if ($member) {
       $_SESSION['id'] = $member['id'];
       $_SESSION['time'] = time();
 
+      // メールアドレスをcookieに⑭日間保存
+      if ($_POST['save'] === 'on') {
+        setcookie('email', $_POST['email'], time()+60*60*24*14);
+      }
+
+      // 全てのテストが通ったらindexへ
       header('Location: index.php');
       exit();
     } else {
@@ -49,7 +66,7 @@ if (!empty($_POST)) {
       <dl>
         <dt>メールアドレス</dt>
         <dd>
-          <input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($_POST['email'], ENT_QUOTES)); ?>" />
+          <input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($email, ENT_QUOTES)); ?>" />
           <?php if($error['login'] === 'blank'): ?>
             <p class="error">*メールアドレスとパスワードを入力して下さい</p>
           <?php endif; ?>
