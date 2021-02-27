@@ -3,7 +3,7 @@ session_start();
 require('dbconnect.php');
 
 if (!empty($_POST)) {
-  if ($_POST['email'] !== '' && $_POST['password' !== '']) {
+  if ($_POST['email'] !== '' && $_POST['password'] !== '') {
     $login = $db->prepare('SELECT * FROM members WHERE email=? AND password=?');
     $login->execute(array(
       $_POST['email'],
@@ -12,11 +12,16 @@ if (!empty($_POST)) {
     $member = $login->fetch();
 
     if ($member) {
-      $_SESSION['id'] =$member['id'];
+      $_SESSION['id'] = $member['id'];
       $_SESSION['time'] = time();
+
       header('Location: index.php');
       exit();
+    } else {
+      $error['login'] = 'failed';
     }
+  } else {
+    $error['login'] = 'blank';
   }
 }
 ?>
@@ -44,11 +49,17 @@ if (!empty($_POST)) {
       <dl>
         <dt>メールアドレス</dt>
         <dd>
-          <input type="text" name="email" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['email']); ?>" />
+          <input type="text" name="email" size="35" maxlength="255" value="<?php print(htmlspecialchars($_POST['email'], ENT_QUOTES)); ?>" />
+          <?php if($error['login'] === 'blank'): ?>
+            <p class="error">*メールアドレスとパスワードを入力して下さい</p>
+          <?php endif; ?>
+          <?php if($error['login'] === 'failed'): ?>
+            <p class="error">*ログインに失敗しました<br>正しく入力して下さい</p>
+          <?php endif; ?>
         </dd>
         <dt>パスワード</dt>
         <dd>
-          <input type="password" name="password" size="35" maxlength="255" value="<?php echo htmlspecialchars($_POST['password']); ?>" />
+          <input type="password" name="password" size="35" maxlength="255" value="<?php print(htmlspecialchars($_POST['password'], ENT_QUOTES)); ?>" />
         </dd>
         <dt>ログイン情報の記録</dt>
         <dd>
